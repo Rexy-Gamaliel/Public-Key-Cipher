@@ -1,11 +1,10 @@
 from Crypto.Util.number import getPrime
 from io import FileIO
 import random
-import math
 
 KEY_DIR = "./key/"
 TEST_DIR = "./test/"
-SIZE_T = 32
+SIZE_T = 64
 
 class KeyGen():
     def __init__(self, p=None, g=None, x=None, y=None):
@@ -46,6 +45,7 @@ class KeyGen():
             self.x = x
         if y:
             self.y = y
+    
 
 class Encoder():
     def __init__(self):
@@ -93,6 +93,20 @@ class Encoder():
 
         return text
 
+    # def decode_r(self, arr_ab, p:int):
+    #     bits = len("{0:b}".format(p))-1
+    #     ab_bin = ''
+    #     for a, b in arr_ab:
+    #         a_bin = "{0:b}".format(a)
+    #         a_bin = bits-len(a_bin)*'0' + a_bin
+    #         b_bin = "{0:b}".format(b) 
+    #         b_bin = bits-len(b_bin)*'0' + b_bin
+    #         ab_bin += a_bin + b_bin
+
+    #     t_bin = []
+    #     while ab_bin != '':
+            
+
 class ElGamal():
     def __init__(self):
         self.key = KeyGen();
@@ -108,9 +122,35 @@ class ElGamal():
         with open(KEY_DIR+"key.pri", "w") as f:
             self.key.dumpPri(f)
 
-    def encrypt(self, text, key=None):
+    def importPubKey(self, filename):
+        file = open(filename, "r")
+        buffer = file.read()
+        file.close()
+
+        lines = buffer.split("\n")
+        if lines[0].split(" ")[0] != "ELGAMAL":
+            print("Import failed")
+            return
+
+        self.key.setKey(y=int(lines[1]),\
+                        g=int(lines[2]),\
+                        p=int(lines[3]))
+
+    def importPriKey(self, filename):
+        file = open(filename, "r")
+        buffer = file.read()
+        file.close()
+
+        lines = buffer.split("\n")
+        if lines[0].split(" ")[0] != "ELGAMAL":
+            print("Import failed")
+            return
+
+        self.key.setKey(x=int(lines[1]),\
+                        p=int(lines[2]))
+
+    def encrypt(self, plain, key=None):
         y, g, p = self.key.public()
-        plain = Encoder().encode(text, p)
         k = random.randint(1, p-2)
         cipher = []
         for m in plain:
@@ -127,16 +167,90 @@ class ElGamal():
         for a, b in cipher:
             m = b * (pow(a, p-1-x, p)) % p
             plain.append(m)
-        return Encoder().decode(plain, p)
+        return plain
+
+    def setKey(self, p=None, g=None, x=None, y=None):
+        self.key = KeyGen(p, g, x, y)
+
+    def encrypt_text(self, text):
+        y, g, p = self.key.public()
+        plain = Encoder().encode(text, p)
+        k = random.randint(1, p-2)
+        cipher = []
+        for m in plain:
+            a = pow(g, k, p)
+            ykp = pow(y, k, p)
+            mp = pow(m, 1, p)
+            b = ykp * mp % p 
+            cipher.append((a,b))
+        return cipher
+
+    def encrypt_file(self, infile, outfile=TEST_DIR+"output"):
+        # filename is in TEST_DIR
+        file = open(infile, "r")
+        plain = file.read()
+        print(plain)
+        file.close()
+        _, _, p = self.key.public()
+        plain = Encoder().encode(plain, p)
+        print(plain)
+        cipher = self.encrypt(plain)
+        print(cipher)
+        with open(outfile, "w") as f:
+            for a,b in cipher:
+                f.write(str(a)+" "+str(b)+"\n")
+
+    def decrypt_file(self, infile, outfile=TEST_DIR+"output"):
+        file = open(infile, 'r')
+        buffer = file.read()
+        print("============DECRYPT==========")
+        file.close
+
+        lines = buffer.split('\n')
+        cipher = []
+        for line in lines:
+            ab = line.split(" ")
+            try:
+                a = int(ab[0])
+                b = int(ab[1])
+                cipher.append((a,b))
+            except:
+                pass
+        
+        print(cipher)
+        
+        with open(outfile, 'w') as f:
+            plain = self.decrypt(cipher)
+            print(plain)
+            plaintext = Encoder().decode(plain, self.key.p)
+            print(plaintext)
+            f.write(plaintext)
 
 def main():
-    cipher = ElGamal()
-    cipher.printkey()
-    cipher.dumpKey()
+    elgamal = ElGamal()
+    # elgamal.dumpKey()
 
-    ciphertext = cipher.encrypt("lalalalhokoko")
-    print(ciphertext)
-    print(cipher.decrypt(ciphertext))
+    elgamal.importPubKey(KEY_DIR+"key.pub")
+    elgamal.importPriKey(KEY_DIR+"key.pri")
+
+    elgamal.encrypt_file("test/input.txt", "test/output.txt")
+    elgamal.decrypt_file("test/output.txt", "test/output2.txt")
+
+    # p = 1399999999
+
+    # plaintext = "hello faris"
+
+    # plain = Encoder().encode(plaintext,p)
+    # print(plain)
+
+    # cipher = elgamal.encrypt(plain)
+    # print(cipher)
+
+    # plain2 = elgamal.decrypt(cipher)
+    # print(plain2)
+
+    # plaintext2 = Encoder().decode(plain2,p)
+    # print(plaintext2)
 
 if __name__ == "__main__":
     main()
