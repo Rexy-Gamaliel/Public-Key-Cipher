@@ -1,19 +1,18 @@
-from array import array
-from ctypes import Array
-from io import FileIO
-from os import POSIX_FADV_DONTNEED
 from Crypto.Util.number import getPrime
+from io import FileIO
 import random
+import math
 
 KEY_DIR = "./key/"
-SIZE_T = 64
+TEST_DIR = "./test/"
+SIZE_T = 32
 
 class KeyGen():
-    def __init__(self):
-        self.p = None
-        self.g = None
-        self.x = None
-        self.y = None
+    def __init__(self, p=None, g=None, x=None, y=None):
+        self.p = p
+        self.g = g
+        self.x = x
+        self.y = y
 
     def generate(self, size=SIZE_T):
         self.p = getPrime(size)
@@ -38,6 +37,15 @@ class KeyGen():
         f.write(str(self.x)+"\n")
         f.write(str(self.p)+"\n")
 
+    def setKey(self, p=None, g=None, x=None, y=None):
+        if p:
+            self.p = p
+        if g:
+            self.g = g
+        if x:
+            self.x = x
+        if y:
+            self.y = y
 
 class Encoder():
     def __init__(self):
@@ -45,7 +53,6 @@ class Encoder():
 
     def encode(self, text, p:int):
         p_bin = "{0:b}".format(p)
-        # t_bin = "".join(format(c, 'b') for c in bytearray(text, 'utf-8'))
         bits = len(p_bin)-1
         t_bin = ""
         for c in bytearray(text, "utf-8"):
@@ -53,10 +60,6 @@ class Encoder():
             padding = 8-len(c_bin)
             c_bin = padding*'0' + c_bin
             t_bin += c_bin
-            print(c_bin)
-
-        print("p bin :", p_bin)
-        print("t bin :", t_bin)
         
         padding = 0
         encoded = []
@@ -81,14 +84,11 @@ class Encoder():
 
         t_bin[len(t_bin)-2] = t_bin[len(t_bin)-2][padding:]
         t_bin = t_bin[:len(t_bin)-1]
-
         t_bin = "".join(t_bin)
 
-        print("t_bin :", t_bin)
         text = ''
         while t_bin != '':
             text += chr(int(t_bin[:8], 2))
-            print(t_bin[:8])
             t_bin = t_bin[8:]
 
         return text
@@ -108,23 +108,35 @@ class ElGamal():
         with open(KEY_DIR+"key.pri", "w") as f:
             self.key.dumpPri(f)
 
-    # def encrypt(text, key):
-    #     encoded = Encoder().encode(text)
-    #     for 
+    def encrypt(self, text, key=None):
+        y, g, p = self.key.public()
+        plain = Encoder().encode(text, p)
+        k = random.randint(1, p-2)
+        cipher = []
+        for m in plain:
+            a = pow(g, k, p)
+            ykp = pow(y, k, p)
+            mp = pow(m, 1, p)
+            b = ykp * mp % p 
+            cipher.append((a,b))
+        return cipher
+
+    def decrypt(self, cipher, key=None):
+        x, p = self.key.private()
+        plain = []
+        for a, b in cipher:
+            m = b * (pow(a, p-1-x, p)) % p
+            plain.append(m)
+        return Encoder().decode(plain, p)
 
 def main():
     cipher = ElGamal()
     cipher.printkey()
     cipher.dumpKey()
 
-    p = 1279000131313
-
-    encoder = Encoder()
-    result = encoder.encode("kzaak kzaak", p)
-    # result = [1200000]
-    print(result)
-
-    print(encoder.decode(result, p))
+    ciphertext = cipher.encrypt("lalalalhokoko")
+    print(ciphertext)
+    print(cipher.decrypt(ciphertext))
 
 if __name__ == "__main__":
     main()
