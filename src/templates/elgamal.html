@@ -20,8 +20,16 @@
 
     <script>
         $("#generateKey").on("click", () => {
-            
+            $.get("/elgamal/genkey").done(data => {
+                console.log(data);
+                key = data;
+                $("#KeyP").val(key.p)
+                $("#KeyG").val(key.g)
+                $("#KeyX").val(key.x)
+                $("#KeyY").val(key.y)
+            })
         })
+        $("#")
     </script>
 
 {% endblock %}
