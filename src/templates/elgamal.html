@@ -19,9 +19,16 @@
     <br>
     <button id="Encrypt" name="Encrypt">Encrypt</button>
     <button id="Decrypt" name="Decrypt">Decrypt</button>
+    <br>
+    <br>
+    <div id="input">
+        <h3>Input</h3>
+        <textarea id="inText" style="resize: both;"
+                name="inText" cols='30' rows="10"></textarea>
+    </div>
 
     <div id="result"></div>
-
+    
     <script>
         $("#generateKey").on("click", () => {
             $.get("/elgamal/genkey").done(data => {
@@ -35,7 +42,7 @@
         })
         $("#Encrypt").on("click", () => {
             let data = createBodyRequest();
-            $.post("/elgamal/encrypt", data).done(data => {
+            $.post("/elgamal/encrypt", {data:data}).done(data => {
                 $("#result").empty()
                 let outputText = 
                 '<br><h3>Result: </h3>\
@@ -45,7 +52,7 @@
         })
         $("#Decrypt").on("click", () => {
             let data = createBodyRequest()
-            $.post("/elgamal/decrypt", data).done(data => {
+            $.post("/elgamal/decrypt", {data:data}).done(data => {
                 $("#result").empty()
                 let outputText = 
                 '<br><h3>Result: </h3>\
@@ -59,6 +66,7 @@
             body.g = $("#KeyG").val()
             body.x = $("#KeyX").val()
             body.y = $("#KeyY").val()
+            body.text =$("#inText").val()
             return JSON.stringify(body)
         }
     </script>

@@ -6,6 +6,8 @@ from ElGamal.elgamal import ElGamal
 app = Flask(__name__)
 app.secret_key = os.urandom(24)
 
+TEMP_DIR = "./temp/"
+
 @app.route('/')
 def home():
     return render_template("home.html")
@@ -28,7 +30,17 @@ def elgamal_genkey():
 
 @app.route('/elgamal/encrypt', methods=["POST", "GET"])
 def elgamal_encrypt():
-    return "test"
+    data = json.loads(request.form.get('data'))
+    gamal = ElGamal()
+    gamal.key.setKey(int(data["p"]),\
+                    int(data["g"]), \
+                    int(data["x"]), \
+                    int(data["y"]))
+    open(TEMP_DIR+"gamal_input.txt", 'w').write(data["text"])
+    gamal.encrypt_file(TEMP_DIR+"gamal_input.txt", \
+                        TEMP_DIR+"gamal_output.txt")
+    result = open(TEMP_DIR+"gamal_output.txt", 'r').read()
+    return result
 
 @app.route('/elgamal/decrypt', methods=["POST", "GET"])
 def elgamal_decrypt():
