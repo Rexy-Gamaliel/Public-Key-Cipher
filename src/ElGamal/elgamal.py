@@ -226,6 +226,19 @@ class ElGamal():
             print(plaintext)
             f.write(plaintext)
 
+    def textbox_to_file(self, text:str, filename:str):
+        data = text.split(" ")
+        i = 0
+        buffer = ""
+        while i < len(data):
+            try:
+                buffer += data[i] + " " + data[i+1] + "\n"
+            except:
+                pass
+            i += 2
+        with open(filename, 'w') as f:
+            f.write(buffer)
+
 def main():
     elgamal = ElGamal()
     # elgamal.dumpKey()

@@ -40,11 +40,22 @@ def elgamal_encrypt():
     gamal.encrypt_file(TEMP_DIR+"gamal_input.txt", \
                         TEMP_DIR+"gamal_output.txt")
     result = open(TEMP_DIR+"gamal_output.txt", 'r').read()
-    return result
+    return json.jsonify(result)
 
 @app.route('/elgamal/decrypt', methods=["POST", "GET"])
 def elgamal_decrypt():
-    return "test"
+    data = json.loads(request.form.get('data'))
+    gamal = ElGamal()
+    gamal.key.setKey(int(data["p"]),\
+                    int(data["g"]), \
+                    int(data["x"]), \
+                    int(data["y"]))
+    gamal.textbox_to_file(data["text"], TEMP_DIR+"gamal_input.txt")
+    gamal.decrypt_file(TEMP_DIR+"gamal_input.txt", \
+                        TEMP_DIR+"gamal_output.txt")
+    result = open(TEMP_DIR+"gamal_output.txt", 'r').read()
+    print(result)
+    return result
 
 if __name__ == "__main__":
     app.run(debug=True)
