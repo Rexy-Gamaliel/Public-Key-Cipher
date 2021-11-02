@@ -1,0 +1,19 @@
+{% extends 'home.html' %}
+
+{% block body %}
+    <br>
+    <h2>ElGamal</h2>
+
+    <form action="/elgamal/encrypt" method="post"></form>
+        <label for="KeyP">Key P : </label>
+        <input type="number" name="KeyP" id="KeyP"><br>
+        <label for="KeyG">Key G : </label>    
+        <input type="number" name="KeyG" id="KeyG"><br>
+        <label for="KeyX">Key X : </label>    
+        <input type="number" name="KeyX" id="KeyX"><br>
+        <label for="KeyY">Key Y : </label>    
+        <input type="number" name="KeyY" id="KeyY"><br>
+
+    
+
+{% endblock %}
