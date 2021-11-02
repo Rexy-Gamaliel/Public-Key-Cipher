@@ -38,10 +38,10 @@ def elgamal_encrypt():
                     int(data["g"]), \
                     int(data["x"]), \
                     int(data["y"]))
-    open(TEMP_DIR+"gamal_input.txt", 'w').write(data["text"])
-    gamal.encrypt_file(TEMP_DIR+"gamal_input.txt", \
-                        TEMP_DIR+"gamal_output.txt")
-    result = open(TEMP_DIR+"gamal_output.txt", 'r').read()
+    open(TEMP_DIR+"input.txt", 'w').write(data["text"])
+    gamal.encrypt_file(TEMP_DIR+"input.txt", \
+                        TEMP_DIR+"output.txt")
+    result = open(TEMP_DIR+"output.txt", 'r').read()
     return json.jsonify(result)
 
 @app.route('/elgamal/decrypt', methods=["POST", "GET"])
@@ -53,10 +53,10 @@ def elgamal_decrypt():
                     int(data["x"]), \
                     int(data["y"]))
     gamal.textbox_to_file(data["text"],\
-                            TEMP_DIR+"gamal_input.txt")
-    gamal.decrypt_file(TEMP_DIR+"gamal_input.txt", \
-                        TEMP_DIR+"gamal_output.txt")
-    result = open(TEMP_DIR+"gamal_output.txt", 'r').read()
+                            TEMP_DIR+"input.txt")
+    gamal.decrypt_file(TEMP_DIR+"input.txt", \
+                        TEMP_DIR+"output.txt")
+    result = open(TEMP_DIR+"output.txt", 'r').read()
     print(result)
     return result
 

@@ -41,8 +41,8 @@
         })
         $("#Encrypt").on("click", () => {
             let data = createBodyRequest();
+            $("#result").empty();
             $.post("/elgamal/encrypt", {data:data}).done(data => {
-                $("#result").empty()
                 let outputText = 
                 '<br><h3>Result: </h3>\
                 <div id="outText">' + data + '</div>'
@@ -51,8 +51,8 @@
         })
         $("#Decrypt").on("click", () => {
             let data = createBodyRequest()
+            $("#result").empty();
             $.post("/elgamal/decrypt", {data:data}).done(data => {
-                $("#result").empty()
                 let outputText = 
                 '<br><h3>Result: </h3>\
                 <div id="outText">' + data + '</div>'
