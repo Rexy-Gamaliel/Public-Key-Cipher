@@ -50,12 +50,21 @@ def elgamal_decrypt():
                     int(data["g"]), \
                     int(data["x"]), \
                     int(data["y"]))
-    gamal.textbox_to_file(data["text"], TEMP_DIR+"gamal_input.txt")
+    gamal.textbox_to_file(data["text"],\
+                            TEMP_DIR+"gamal_input.txt")
     gamal.decrypt_file(TEMP_DIR+"gamal_input.txt", \
                         TEMP_DIR+"gamal_output.txt")
     result = open(TEMP_DIR+"gamal_output.txt", 'r').read()
     print(result)
     return result
+
+
+@app.route("/paillier")
+def paillier():
+    return render_template("paillier.html")
+
+
+
 
 if __name__ == "__main__":
     app.run(debug=True)

@@ -1,10 +1,8 @@
 from Crypto.Util.number import getPrime
 from io import FileIO
 import random
+from constant import *
 
-KEY_DIR = "./key/"
-TEST_DIR = "./test/"
-SIZE_T = 64
 
 class KeyGen():
     def __init__(self, p=None, g=None, x=None, y=None):
@@ -117,9 +115,9 @@ class ElGamal():
         print(self.key.private())
 
     def dumpKey(self):
-        with open(KEY_DIR+"key.pub", "w") as f:
+        with open(KEY_DIR+"elgamal.pub", "w") as f:
             self.key.dumpPub(f)
-        with open(KEY_DIR+"key.pri", "w") as f:
+        with open(KEY_DIR+"elgamal.pri", "w") as f:
             self.key.dumpPri(f)
 
     def importPubKey(self, filename):
