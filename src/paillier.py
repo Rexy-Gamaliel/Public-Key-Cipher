@@ -1,10 +1,10 @@
 from io import FileIO
 from Crypto.Util.number import GCD, getPrime
 import random
+from app import TEMP_DIR
+from constant import *
 
-KEY_DIR = "./key/"
-TEST_DIR = "./test/"
-SIZE_T = 64
+from elgamal import Encoder
 
 def LCM(a, b):
     return a * b // GCD(a,b)
@@ -108,6 +108,34 @@ class Paillier():
             plain.append(m)
         return plain
 
+    def encrypt_file(self, infile:str, outfile:str):
+        file = open(infile, 'r')
+        text = file.read()
+        file.close()
+        plain = Encoder().encode(text, self.key.n)
+        print(plain)
+        cipher = self.encrypt(plain)
+        with open(outfile, 'w') as f:
+            for c in cipher:
+                f.write(str(c)+" ")
+    
+    def decrypt_file(self, infile:str, outfile:str):
+        file = open(infile, 'r')
+        buff = file.read().split(" ")
+        file.close()
+        cipher = []
+        for c in buff:
+            try:
+                cipher.append(int(c))
+            except:
+                pass
+        plain = self.decrypt(cipher)
+        print(plain)
+        plaintext = Encoder().decode(plain, self.key.n)
+        with open(outfile, 'w') as f:
+            f.write(plaintext)
+
+
 def main():
     print("hello palier")
     pail = Paillier()
@@ -115,11 +143,11 @@ def main():
     pail.dumpKey(KEY_DIR+"paillier.pub",\
                 KEY_DIR+"paillier.pri")
 
-    cipher = pail.encrypt([20000000000000000000000000000000000000])
-    print(cipher)
+    pail.encrypt_file(TEST_DIR+"input.txt", \
+                        TEST_DIR+"output.txt")
 
-    plain = pail.decrypt(cipher)
-    print(plain)
+    pail.decrypt_file(TEST_DIR+"output.txt", \
+                        TEST_DIR+"output2.txt")
 
 if __name__ == "__main__":
     main()

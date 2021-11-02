@@ -1,7 +1,7 @@
 from flask import *
 import os
 
-from ElGamal.elgamal import ElGamal
+from elgamal import ElGamal
 
 app = Flask(__name__)
 app.secret_key = os.urandom(24)
