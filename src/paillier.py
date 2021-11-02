@@ -1,7 +1,6 @@
 from io import FileIO
 from Crypto.Util.number import GCD, getPrime
 import random
-from app import TEMP_DIR
 from constant import *
 
 from elgamal import Encoder

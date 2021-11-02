@@ -5,14 +5,14 @@
     <h2>Paillier</h2>
 
     <form action="" method="post"></form>
-        <label for="KeyP">Key P : </label>
-        <input type="number" name="KeyP" id="KeyP"><br>
-        <label for="KeyG">Key G : </label>    
+        <label for="KeyG">Key g : </label>
         <input type="number" name="KeyG" id="KeyG"><br>
-        <label for="KeyX">Key X : </label>    
-        <input type="number" name="KeyX" id="KeyX"><br>
-        <label for="KeyY">Key Y : </label>    
-        <input type="number" name="KeyY" id="KeyY"><br>        
+        <label for="KeyN">Key n : </label>    
+        <input type="number" name="KeyN" id="KeyN"><br>
+        <label for="KeyH">Key &#955; : </label>    
+        <input type="number" name="KeyH" id="KeyH"><br>
+        <label for="KeyU">Key  	&#956; : </label>    
+        <input type="number" name="KeyU" id="KeyU"><br>        
     <button id="generateKey">Generate Key</button>
     <button id="importKey">Import Key</button>
     <br>
@@ -29,9 +29,19 @@
     <div id="result"></div>
 
     <script>
+    $("#generateKey").on("click", () => {
+        $.get("/paillier/genkey").done(data => {
+            console.log(data);
+            key = data;
+            $("#KeyG").val(key.g)
+            $("#KeyN").val(key.n)
+            $("#KeyH").val(key.h)
+            $("#KeyU").val(key.u)
+        })
+    })
     $("#Encrypt").on("click", () => {
         let data = createBodyRequest();
-        $.post("/elgamal/encrypt", {data:data}).done(data => {
+        $.post("/paillier/encrypt", {data:data}).done(data => {
             $("#result").empty()
             let outputText = 
             '<br><h3>Result: </h3>\
@@ -41,7 +51,7 @@
     })
     $("#Decrypt").on("click", () => {
         let data = createBodyRequest()
-        $.post("/elgamal/decrypt", {data:data}).done(data => {
+        $.post("/paillier/decrypt", {data:data}).done(data => {
             $("#result").empty()
             let outputText = 
             '<br><h3>Result: </h3>\
@@ -51,10 +61,10 @@
     })
     const createBodyRequest = function() {
         let body = {}
-        body.p = $("#KeyP").val()
+        body.n = $("#KeyN").val()
         body.g = $("#KeyG").val()
-        body.x = $("#KeyX").val()
-        body.y = $("#KeyY").val()
+        body.h = $("#KeyH").val()
+        body.u = $("#KeyU").val()
         body.text =$("#inText").val()
         return JSON.stringify(body)
     }
