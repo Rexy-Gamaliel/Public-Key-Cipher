@@ -15,8 +15,12 @@
         <input type="number" name="KeyY" id="KeyY"><br>        
     <button id="generateKey">Generate Key</button>
     <button id="importKey">Import Key</button>
-    <button id="setKey">Set Key</button>
+    <br>
+    <br>
+    <button id="Encrypt" name="Encrypt">Encrypt</button>
+    <button id="Decrypt" name="Decrypt">Decrypt</button>
 
+    <div id="result"></div>
 
     <script>
         $("#generateKey").on("click", () => {
@@ -29,6 +33,34 @@
                 $("#KeyY").val(key.y)
             })
         })
+        $("#Encrypt").on("click", () => {
+            let data = createBodyRequest();
+            $.post("/elgamal/encrypt", data).done(data => {
+                $("#result").empty()
+                let outputText = 
+                '<br><h3>Result: </h3>\
+                <div id="outText">' + data + '</div>'
+                $("#result").append(outputText)
+            })
+        })
+        $("#Decrypt").on("click", () => {
+            let data = createBodyRequest()
+            $.post("/elgamal/decrypt", data).done(data => {
+                $("#result").empty()
+                let outputText = 
+                '<br><h3>Result: </h3>\
+                <div id="outText">' + data + '</div>'
+                $("#result").append(outputText)
+            })
+        })
+        const createBodyRequest = function() {
+            let body = {}
+            body.p = $("#KeyP").val()
+            body.g = $("#KeyG").val()
+            body.x = $("#KeyX").val()
+            body.y = $("#KeyY").val()
+            return JSON.stringify(body)
+        }
     </script>
 
 {% endblock %}

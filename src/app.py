@@ -26,5 +26,13 @@ def elgamal_genkey():
         key[k] = str(key[k])
     return key
 
+@app.route('/elgamal/encrypt', methods=["POST", "GET"])
+def elgamal_encrypt():
+    return "test"
+
+@app.route('/elgamal/decrypt', methods=["POST", "GET"])
+def elgamal_decrypt():
+    return "test"
+
 if __name__ == "__main__":
     app.run(debug=True)
