@@ -22,7 +22,8 @@ def elgamal_genkey():
     key = dict()
     key['y'], key['g'], key['p'] = gamal.key.public()
     key['x'], key['p'] = gamal.key.private()
-    print(key)
+    for k in key:
+        key[k] = str(key[k])
     return key
 
 if __name__ == "__main__":
