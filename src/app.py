@@ -60,6 +60,48 @@ def elgamal_decrypt():
     print(result)
     return result
 
+# @app.route("/elgamal/file", methods=["POST", "GET"])
+# def elgamal_file():
+#     print(request.form)
+#     f = request.files["file"]
+#     f.save(TEMP_DIR+"input")
+#     elga = ElGamal()
+#     return send_file
+
+@app.route("/elgamal/dumpkey", methods=["POST", "GET"])
+def elgamal_dumpkey():
+    data = json.loads(request.form.get('data'))
+    gamal = ElGamal()
+    gamal.key.setKey(int(data["p"]),\
+                    int(data["g"]), \
+                    int(data["x"]), \
+                    int(data["y"]))
+    gamal.dumpKey(TEMP_DIR+"key.pub", TEMP_DIR+"key.pri")
+    return "success"
+
+@app.route("/elgamal/file_encrypt", methods=["POST", "GET"])
+def elgamal_encrypt_file():
+    f = request.files["file"]
+    f.save(TEMP_DIR+"input")
+    elga = ElGamal()
+    elga.importPubKey(TEMP_DIR+"key.pub")
+    elga.importPriKey(TEMP_DIR+"key.pri")
+    outfilename = ".out/output"
+    elga.encrypt_any_file(TEMP_DIR+"input", "./src/"+outfilename)
+    path = os.path.join(current_app.root_path + "/" + outfilename)
+    return send_file(path, as_attachment=True)
+
+@app.route("/elgamal/file_decrypt", methods=["POST", "GET"])
+def elgamal_decrypt_file():
+    f = request.files["file"]
+    f.save(TEMP_DIR+"input")
+    elga = ElGamal()
+    elga.importPubKey(TEMP_DIR+"key.pub")
+    elga.importPriKey(TEMP_DIR+"key.pri")
+    outfilename = ".out/output"
+    elga.decrypt_any_file(TEMP_DIR+"input", "./src/"+outfilename)
+    path = os.path.join(current_app.root_path + "/" + outfilename)
+    return send_file(path, as_attachment=True)
 
 @app.route("/paillier")
 def paillier():

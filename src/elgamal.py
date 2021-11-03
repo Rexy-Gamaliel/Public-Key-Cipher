@@ -115,10 +115,10 @@ class ElGamal():
         print(self.key.public())
         print(self.key.private())
 
-    def dumpKey(self):
-        with open(KEY_DIR+"elgamal.pub", "w") as f:
+    def dumpKey(self, pubfile=KEY_DIR+"elgamal.pub", prifile=KEY_DIR+"elgamal.pri"):
+        with open(pubfile, "w") as f:
             self.key.dumpPub(f)
-        with open(KEY_DIR+"elgamal.pri", "w") as f:
+        with open(prifile, "w") as f:
             self.key.dumpPri(f)
 
     def importPubKey(self, filename):
