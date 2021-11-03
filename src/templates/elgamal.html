@@ -14,17 +14,35 @@
         <label for="KeyY">Key Y : </label>    
         <input type="number" name="KeyY" id="KeyY"><br>        
     <button id="generateKey">Generate Key</button>
-    <button id="importKey">Import Key</button>
+    <!-- <br>
+    <button id="importPriKey">Import Private Key</button>
+    <button id="importPubKey">Import Public Key</button>
+
+    <br> -->
+    <!-- <form action = "/elgamal" method = "POST" 
+    enctype = "multipart/form-data">
+        <label for="importPriKey">Import Private Key</label>
+        <input id="importPriKey" type = "file" name = "file" style="visibility: hidden;">
+        <input id="inputFile" type = "submit" value="Submit"/>
+    </form> -->
     <br>
     <br>
     <div id="input">
         <h3>Input</h3>
-        <textarea id="inText" style="resize: both;"
-                name="inText" cols='30' rows="10"></textarea>
+        <button id="text-input-on" style="width: 80px;">Text</button>
+        <button id="file-input-on" style="width: 80px;">File</button>
+        <br><br>
+        <div id='text-input' hidden>
+            <textarea id="inText" style="resize: both;"
+                    name="inText" cols='30' rows="10"></textarea><br><br>
+            <button id="Encrypt" name="Encrypt">Encrypt</button>
+            <button id="Decrypt" name="Decrypt">Decrypt</button>
+        </div>
+        <div id='file-input' hidden>
+
+        </div>
     </div>
     <br>
-    <button id="Encrypt" name="Encrypt">Encrypt</button>
-    <button id="Decrypt" name="Decrypt">Decrypt</button>
 
     <div id="result"></div>
     
@@ -68,6 +86,14 @@
             body.text =$("#inText").val()
             return JSON.stringify(body)
         }
+        $("#text-input-on").on("click", () => {
+            $("#text-input").removeAttr("hidden")
+            $("#file-input").attr("hidden", 1)
+        })
+        $("#file-input-on").on("click", () => {
+            $("#file-input").removeAttr("hidden")
+            $("#text-input").attr("hidden", 1)
+        })
     </script>
 
 {% endblock %}

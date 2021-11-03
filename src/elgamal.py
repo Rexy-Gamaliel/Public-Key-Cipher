@@ -1,3 +1,4 @@
+from os import truncate
 from Crypto.Util.number import getPrime
 from io import FileIO
 import random
@@ -53,8 +54,8 @@ class Encoder():
         p_bin = "{0:b}".format(p)
         bits = len(p_bin)-1
         t_bin = ""
-        for c in bytearray(text, "utf-8"):
-            c_bin = format(c, 'b')
+        for c in text:
+            c_bin = "{0:b}".format(ord(c))
             padding = 8-len(c_bin)
             c_bin = padding*'0' + c_bin
             t_bin += c_bin
@@ -149,9 +150,9 @@ class ElGamal():
 
     def encrypt(self, plain, key=None):
         y, g, p = self.key.public()
-        k = random.randint(1, p-2)
         cipher = []
         for m in plain:
+            k = random.randint(1, p-2)
             a = pow(g, k, p)
             ykp = pow(y, k, p)
             mp = pow(m, 1, p)
@@ -173,9 +174,9 @@ class ElGamal():
     def encrypt_text(self, text):
         y, g, p = self.key.public()
         plain = Encoder().encode(text, p)
-        k = random.randint(1, p-2)
         cipher = []
         for m in plain:
+            k = random.randint(1, p-2)
             a = pow(g, k, p)
             ykp = pow(y, k, p)
             mp = pow(m, 1, p)
@@ -187,13 +188,10 @@ class ElGamal():
         # filename is in TEST_DIR
         file = open(infile, "r")
         plain = file.read()
-        print(plain)
         file.close()
         _, _, p = self.key.public()
         plain = Encoder().encode(plain, p)
-        print(plain)
         cipher = self.encrypt(plain)
-        print(cipher)
         with open(outfile, "w") as f:
             for a,b in cipher:
                 f.write(str(a)+" "+str(b)+"\n")
@@ -201,9 +199,7 @@ class ElGamal():
     def decrypt_file(self, infile, outfile=TEST_DIR+"output"):
         file = open(infile, 'r')
         buffer = file.read()
-        print("============DECRYPT==========")
-        file.close
-
+        file.close()
         lines = buffer.split('\n')
         cipher = []
         for line in lines:
@@ -214,14 +210,9 @@ class ElGamal():
                 cipher.append((a,b))
             except:
                 pass
-        
-        print(cipher)
-        
         with open(outfile, 'w') as f:
             plain = self.decrypt(cipher)
-            print(plain)
             plaintext = Encoder().decode(plain, self.key.p)
-            print(plaintext)
             f.write(plaintext)
 
     def textbox_to_file(self, text:str, filename:str):
@@ -237,6 +228,44 @@ class ElGamal():
         with open(filename, 'w') as f:
             f.write(buffer)
 
+    def encrypt_any_file(self, infile:str, outfile:str):
+        file = open(infile, "rb")
+        byte = file.read()
+        file.close()
+        byte2 = []
+        byte2.extend(byte[:10])
+        plaintext = "".join(chr(b) for b in byte)
+        self.test1 = plaintext
+        _, _, p = self.key.public()
+        plain = Encoder().encode(plaintext, p)
+        cipher = self.encrypt(plain)
+        with open(outfile, "w") as f:
+            for a,b in cipher:
+                f.write(str(a)+" "+str(b)+"\n")
+    
+    def decrypt_any_file(self, infile:str, outfile:str):
+        file = open(infile, 'r')
+        buffer = file.read()
+        file.close
+        lines = buffer.split('\n')
+        cipher = []
+        for line in lines:
+            ab = line.split(" ")
+            try:
+                a = int(ab[0])
+                b = int(ab[1])
+                cipher.append((a,b))
+            except:
+                pass
+        with open(outfile, 'wb') as f:
+            plain = self.decrypt(cipher)
+            plaintext = Encoder().decode(plain, self.key.p)
+            self.test2 = plaintext
+            plain = []
+            for p in plaintext:
+                plain.append(ord(p))
+            f.write(bytes(plain))
+
 def main():
     elgamal = ElGamal()
     # elgamal.dumpKey()
@@ -244,24 +273,20 @@ def main():
     elgamal.importPubKey(KEY_DIR+"key.pub")
     elgamal.importPriKey(KEY_DIR+"key.pri")
 
-    elgamal.encrypt_file("test/input.txt", "test/output.txt")
-    elgamal.decrypt_file("test/output.txt", "test/output2.txt")
+    # elgamal.encrypt_file("test/input.txt", "test/output.txt")
+    # elgamal.decrypt_file("test/output.txt", "test/output2.txt")
 
-    # p = 1399999999
+    elgamal.encrypt_any_file("test/input", "test/output")
+    elgamal.decrypt_any_file("test/output", "test/output2")
 
-    # plaintext = "hello faris"
+    # print(elgamal.test1)
+    # print(elgamal.test2)
 
-    # plain = Encoder().encode(plaintext,p)
-    # print(plain)
+    # print(elgamal.test1[:20])
+    # enc = Encoder().encode(elgamal.test1, elgamal.key.p, True)
 
-    # cipher = elgamal.encrypt(plain)
-    # print(cipher)
-
-    # plain2 = elgamal.decrypt(cipher)
-    # print(plain2)
-
-    # plaintext2 = Encoder().decode(plain2,p)
-    # print(plaintext2)
+    # dec = Encoder().decode(enc, elgamal.key.p, True)
+    # print(dec[:20])
 
 if __name__ == "__main__":
     main()
