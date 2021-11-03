@@ -222,6 +222,9 @@ class RSA():
         # util.writefile(output_dir, ''.join(str(i) for i in decrypted))
         return message
 
+    def printKey(self):
+        print("n:{}\ne:{}\nd:{}".format(self._n, self._e, self._d))
+
 if __name__ == "__main__":
     # print(readfile('../input.txt'))
     rsa = RSA(16)

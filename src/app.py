@@ -1,6 +1,7 @@
 from flask import *
 import os
-from constant import KEY_DIR
+from RSA.rsa import RSA
+from constant import KEY_DIR, SIZE_T
 
 from elgamal import ElGamal
 from paillier import Paillier
@@ -184,6 +185,53 @@ def paillier_decrypt_file():
     pail.decrypt_any_file(TEMP_DIR+"input", "./src/"+outfilename)
     path = os.path.join(current_app.root_path + "/" + outfilename)
     return send_file(path, as_attachment=True)
+
+
+#------------- RSA -------------
+@app.route("/rsa")
+def rsa():
+    return render_template("rsa.html")
+
+@app.route("/rsa/genkey")
+def rsa_genkey():
+    rsai = RSA(SIZE_T)
+    rsai.generate_keys()
+    rsai.printKey()
+    key = dict()
+    key['n'] = rsai._n
+    key['e'] = rsai._e
+    key['d'] = rsai._d
+    for k in key:
+        key[k] = str(key[k])
+    return key
+
+@app.route("/rsa/encrypt", methods=["POST", "GET"])
+def rsa_encrypt():
+    data = json.loads(request.form.get('data'))
+    rsai = RSA(SIZE_T)
+    rsai._n = int(data['n'])
+    rsai._e = int(data['e'])
+    rsai._d = int(data['d'])
+    with open("./temp/input.txt", 'w') as f:
+        f.write(data["text"])
+    rsai.encrypt_txt("./temp/input.txt", "./temp/output.txt")
+    with open("./temp/output.txt", 'r') as f:
+        result = f.read()
+    return result
+
+@app.route("/rsa/decrypt", methods=["POST", "GET"])
+def rsa_decrypt():
+    data = json.loads(request.form.get('data'))
+    rsai = RSA(SIZE_T)
+    rsai._n = int(data['n'])
+    rsai._e = int(data['e'])
+    rsai._d = int(data['d'])
+    with open("./temp/input.txt", 'w') as f:
+        f.write(data["text"])
+    rsai.decrypt_txt("./temp/input.txt", "./temp/output.txt")
+    with open("./temp/output.txt", 'r') as f:
+        result = f.read()
+    return result
 
 if __name__ == "__main__":
     app.run(debug=True)

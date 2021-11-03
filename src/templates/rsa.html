@@ -1,0 +1,114 @@
+{% extends 'home.html' %}
+
+{% block body %}
+    <br>
+    <h2>RSA</h2>
+
+    <form action="/elgamal/encrypt" method="post"></form>
+        <label for="KeyN">Key N : </label>
+        <input type="number" name="KeyN" id="KeyN"><br>
+        <label for="KeyE">Key E : </label>    
+        <input type="number" name="KeyE" id="KeyE"><br>
+        <label for="KeyD">Key D : </label>    
+        <input type="number" name="KeyD" id="KeyD"><br>      
+    <button id="generateKey">Generate Key</button>
+    <!-- <br>
+    <button id="importPriKey">Import Private Key</button>
+    <button id="importPubKey">Import Public Key</button>
+
+    <br> -->
+    <!-- <form action = "/elgamal" method = "POST" 
+    enctype = "multipart/form-data">
+        <label for="importPriKey">Import Private Key</label>
+        <input id="importPriKey" type = "file" name = "file" style="visibility: hidden;">
+        <input id="inputFile" type = "submit" value="Submit"/>
+    </form> -->
+    <br>
+    <br>
+    <div id="input">
+        <h3>Input</h3>
+        <button id="text-input-on" style="width: 80px;">Text</button>
+        <button id="file-input-on" style="width: 80px;">File</button>
+        <br><br>
+        <div id='text-input' hidden>
+            <textarea id="inText" style="resize: both;"
+                    name="inText" cols='30' rows="10"></textarea><br><br>
+            <button id="Encrypt" name="Encrypt">Encrypt</button>
+            <button id="Decrypt" name="Decrypt">Decrypt</button>
+            <br>
+            <div id="result"></div>
+        </div>
+        <div id='file-input' hidden>
+            <form id="file-form" action="/rsa" method="post"
+            enctype = "multipart/form-data">
+                <input id="file" type ="file" name ="file">
+                <button id="file-submit" type="submit" hidden>Submit</button>
+            </form>   <br>
+            <button id="Encrypt-File" name="Encrypt">Encrypt</button>
+            <button id="Decrypt-File" name="Decrypt">Decrypt</button>
+        </div>
+    </div>
+    
+    <script>
+        $("#generateKey").on("click", () => {
+            $.get("/rsa/genkey").done(data => {
+                console.log(data);
+                key = data;
+                $("#KeyN").val(key.n)
+                $("#KeyE").val(key.e)
+                $("#KeyD").val(key.d)
+            })
+        })
+        $("#Encrypt").on("click", () => {
+            let data = createBodyRequest();
+            $("#result").empty();
+            $.post("/rsa/encrypt", {data:data}).done(data => {
+                let outputText = 
+                '<br><h3>Result: </h3>\
+                <div id="outText">' + data + '</div>'
+                $("#result").append(outputText)
+            })
+        })
+        $("#Decrypt").on("click", () => {
+            let data = createBodyRequest()
+            $("#result").empty();
+            $.post("/rsa/decrypt", {data:data}).done(data => {
+                let outputText = 
+                '<br><h3>Result: </h3>\
+                <div id="outText">' + data + '</div>'
+                $("#result").append(outputText)
+            })
+        })
+        const createBodyRequest = function() {
+            let body = {}
+            body.n = $("#KeyN").val()
+            body.e = $("#KeyE").val()
+            body.d = $("#KeyD").val()
+            body.text =$("#inText").val()
+            return JSON.stringify(body)
+        }
+        $("#text-input-on").on("click", () => {
+            $("#text-input").removeAttr("hidden")
+            $("#file-input").attr("hidden", 1)
+        })
+        $("#file-input-on").on("click", () => {
+            $("#file-input").removeAttr("hidden")
+            $("#text-input").attr("hidden", 1)
+        })
+        $("#Encrypt-File").on('click', () => {
+            let data = createBodyRequest();
+            $.post("/elgamal/dumpkey", {data:data}).done(data => {
+                $("#file-form").attr("action", "/elgamal/file_encrypt")
+                $("#file-submit").click()
+            })
+        })
+        $("#Decrypt-File").on('click', () => {
+            let data = createBodyRequest();
+            $.post("/elgamal/dumpkey", {data:data}).done(data => {
+                $("#file-form").attr("action", "/elgamal/file_decrypt")
+                $("#file-submit").click()
+            })
+        })
+    </script>
+
+{% endblock %}
