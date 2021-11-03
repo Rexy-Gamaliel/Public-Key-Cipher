@@ -212,6 +212,7 @@ def rsa_encrypt():
     rsai._n = int(data['n'])
     rsai._e = int(data['e'])
     rsai._d = int(data['d'])
+    rsai._n_bit = len("{0:b}".format(rsai._e))
     with open("./temp/input.txt", 'w') as f:
         f.write(data["text"])
     rsai.encrypt_txt("./temp/input.txt", "./temp/output.txt")
@@ -226,12 +227,14 @@ def rsa_decrypt():
     rsai._n = int(data['n'])
     rsai._e = int(data['e'])
     rsai._d = int(data['d'])
+    rsai._n_bit = len("{0:b}".format(rsai._e))
     with open("./temp/input.txt", 'w') as f:
         f.write(data["text"])
     rsai.decrypt_txt("./temp/input.txt", "./temp/output.txt")
     with open("./temp/output.txt", 'r') as f:
         result = f.read()
     return result
+
 
 if __name__ == "__main__":
     app.run(debug=True)
