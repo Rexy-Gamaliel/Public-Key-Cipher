@@ -37,14 +37,19 @@
                     name="inText" cols='30' rows="10"></textarea><br><br>
             <button id="Encrypt" name="Encrypt">Encrypt</button>
             <button id="Decrypt" name="Decrypt">Decrypt</button>
+            <br>
+            <div id="result"></div>
         </div>
         <div id='file-input' hidden>
-
+            <form id="file-form" action="/elgamal" method="post"
+            enctype = "multipart/form-data">
+                <input id="file" type ="file" name ="file">
+                <button id="file-submit" type="submit" hidden>Submit</button>
+            </form>   <br>
+            <button id="Encrypt-File" name="Encrypt">Encrypt</button>
+            <button id="Decrypt-File" name="Decrypt">Decrypt</button>
         </div>
     </div>
-    <br>
-
-    <div id="result"></div>
     
     <script>
         $("#generateKey").on("click", () => {
@@ -93,6 +98,20 @@
         $("#file-input-on").on("click", () => {
             $("#file-input").removeAttr("hidden")
             $("#text-input").attr("hidden", 1)
+        })
+        $("#Encrypt-File").on('click', () => {
+            let data = createBodyRequest();
+            $.post("/elgamal/dumpkey", {data:data}).done(data => {
+                $("#file-form").attr("action", "/elgamal/file_encrypt")
+                $("#file-submit").click()
+            })
+        })
+        $("#Decrypt-File").on('click', () => {
+            let data = createBodyRequest();
+            $.post("/elgamal/dumpkey", {data:data}).done(data => {
+                $("#file-form").attr("action", "/elgamal/file_decrypt")
+                $("#file-submit").click()
+            })
         })
     </script>
 
