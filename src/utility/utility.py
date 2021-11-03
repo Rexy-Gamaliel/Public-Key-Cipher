@@ -3,23 +3,41 @@ import random
 from time import time
 
 dirname = os.path.dirname(__file__)
+# print("awal:", dirname)
+dirname = os.path.dirname(os.path.dirname(dirname))
+# print("akhir:", dirname)
 
 def readfile(directory):
-    # !file directory is relative to utility.py!
+    # !file directory is relative to project folder (public-key-cipher)!
     filename = os.path.join(dirname, directory)
     with open(filename, 'rb') as file:
-        bytelist = file.readlines()
-        bytes = b''
-        for line in bytelist:
-            bytes += line
+        bytes = file.read()
         return bytes
 
 def writefile(directory, content):
-    # !file directory is relative to utility.py!
+    # !file directory is relative to project folder (public-key-cipher)!
     filename = os.path.join(dirname, directory)
     with open(filename, 'wb') as file:
         file.write(content)
 
+def gcd(a, b):
+    # Return FPB/GCD of a and b
+    if a > b:
+        nmax = a
+        nmin = b
+    else:
+        nmax = b
+        nmin = a
+    #
+    while True:
+        # while nmax >= nmin:
+        #     nmax -= nmin
+        nmax %= nmin
+        nmax, nmin = nmin, nmax
+        if nmin == 0:
+            break
+        # nmax > nmin, nmin != 0
+    return nmax
 
 class PrimeGenerator():
     '''
@@ -135,9 +153,7 @@ class PrimeGenerator():
 
             print('end: ', time() - self.timestamp)
             return number
-                
 
 if __name__ == "__main__":
-    # Test generate prime, insert number of bits
-    p = PrimeGenerator(1024)
-    print(p.generate_prime())
+    writefile("test/rsa-output-test.txt", '\x01'.encode("utf-8"))
+    pass
