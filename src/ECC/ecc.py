@@ -90,7 +90,7 @@ class ECC():
     def determine_start_point(self):
         while True:
             # x = randrange(self._p)
-            x = 178353325960679233252873817867044506126
+            x = 186567088478871200652695848364648394030
             print("failed?", x)
             y_squared = self._y_square(x) % self._p
             result = util.modular_sqrt(y_squared, self._p)
@@ -123,15 +123,20 @@ class ECC():
         return (x, y)
     
     def multiply_point(self, P, k:int):
-        assert(k > 1)
-        result = P
-        # print(result)
-        k -= 1
-        while k > 0:
-            result = self.add_points(result, P)
-            # print(result)
-            k -= 1
-        return result
+        if k == 1:
+            # Basis
+            return P
+        
+        if k%2 == 1:
+            # if k is odd
+            # return 2 (k-1)P + P
+            half_P = self.multiply_point(P, k//2)
+            return self.add_points(self.double_point(half_P), P)
+        else:
+            # if k is even
+            # return 2 (k-1)P
+            half_P = self.multiply_point(P, k//2)
+            return self.double_point(half_P)
 
 if __name__ == "__main__":
     start = time()
@@ -140,7 +145,7 @@ if __name__ == "__main__":
     ecc.initiate()
     ecc.show_info()
     starting_point = ecc.point
-    k = 1 << 20
+    k = 1 << 128
     print(f"{k = }")
     result = ecc.multiply_point(starting_point, k)
     print(result)
