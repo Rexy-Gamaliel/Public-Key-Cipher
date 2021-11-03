@@ -97,15 +97,15 @@
         })
         $("#Encrypt-File").on('click', () => {
             let data = createBodyRequest();
-            $.post("/elgamal/dumpkey", {data:data}).done(data => {
-                $("#file-form").attr("action", "/elgamal/file_encrypt")
+            $.post("/rsa/dumpkey", {data:data}).done(data => {
+                $("#file-form").attr("action", "/rsa/file_encrypt")
                 $("#file-submit").click()
             })
         })
         $("#Decrypt-File").on('click', () => {
             let data = createBodyRequest();
-            $.post("/elgamal/dumpkey", {data:data}).done(data => {
-                $("#file-form").attr("action", "/elgamal/file_decrypt")
+            $.post("/rsa/dumpkey", {data:data}).done(data => {
+                $("#file-form").attr("action", "/rsa/file_decrypt")
                 $("#file-submit").click()
             })
         })

@@ -2,8 +2,9 @@
 import sys
 sys.path.append("../../../public-key-cipher")
 import os
-import src.utility.utility as util
-from src.ElGamal.elgamal import Encoder
+# import src.utility.utility as util
+# from src.ElGamal.elgamal import Encoder
+import utility.utility as util
 from random import randrange
 # from src.utility.utility import readfile
 

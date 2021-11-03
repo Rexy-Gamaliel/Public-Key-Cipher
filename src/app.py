@@ -235,6 +235,54 @@ def rsa_decrypt():
         result = f.read()
     return result
 
+@app.route("/rsa/dumpkey", methods=["POST", "GET"])
+def rsa_dumpkey():
+    data = json.loads(request.form.get('data'))
+    rsai = RSA()
+    rsai._n = int(data['n'])
+    rsai._e = int(data['e'])
+    rsai._d = int(data['d'])
+    rsai.store_keys()
+    return "success"
+
+@app.route("/rsa/file_encrypt", methods=["POST", "GET"])
+def rsa_encrypt_file():
+    f = request.files["file"]
+    f.save(TEMP_DIR+"input")
+    rsai = RSA(SIZE_T)
+    rsai.read_keys()
+    rsai._n_bit = len("{0:b}".format(rsai._e))
+    outfilename = ".out/output"
+
+    with open(TEMP_DIR+"input", "rb") as f:
+        byte = f.read()
+        text = "".join(chr(b) for b in byte)
+        with open(TEMP_DIR+'medium', 'w') as g:
+            g.write(text)
+    
+    rsai.encrypt_txt(TEMP_DIR+"medium", "./src/"+outfilename)
+    path = os.path.join(current_app.root_path + "/" + outfilename)
+    return send_file(path, as_attachment=True)
+
+@app.route("/rsa/file_decrypt", methods=["POST", "GET"])
+def rsa_decrypt_file():
+    f = request.files["file"]
+    f.save(TEMP_DIR+"input")
+    rsai = RSA(SIZE_T)
+    rsai.read_keys()
+    rsai._n_bit = len("{0:b}".format(rsai._e))
+    outfilename = ".out/output"
+    rsai.decrypt_txt(TEMP_DIR+"input", TEMP_DIR+'medium')
+    
+    with open(TEMP_DIR+"medium", "r") as f:
+        text = f.read()
+        byte = []
+        byte.extend(ord(c) for c in text)
+        with open("./src/"+outfilename, 'wb') as g:
+            g.write(bytes(byte))
+        
+    path = os.path.join(current_app.root_path + "/" + outfilename)
+    return send_file(path, as_attachment=True)
 
 if __name__ == "__main__":
     app.run(debug=True)
