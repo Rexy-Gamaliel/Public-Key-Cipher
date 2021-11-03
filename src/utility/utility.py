@@ -2,43 +2,6 @@ import os
 import random
 from time import time
 
-dirname = os.path.dirname(__file__)
-# print("awal:", dirname)
-dirname = os.path.dirname(os.path.dirname(dirname))
-# print("akhir:", dirname)
-
-def readfile(directory):
-    # !file directory is relative to project folder (public-key-cipher)!
-    filename = os.path.join(dirname, directory)
-    with open(filename, 'rb') as file:
-        bytes = file.read()
-        return bytes
-
-def writefile(directory, content):
-    # !file directory is relative to project folder (public-key-cipher)!
-    filename = os.path.join(dirname, directory)
-    with open(filename, 'wb') as file:
-        file.write(content)
-
-def gcd(a, b):
-    # Return FPB/GCD of a and b
-    if a > b:
-        nmax = a
-        nmin = b
-    else:
-        nmax = b
-        nmin = a
-    #
-    while True:
-        # while nmax >= nmin:
-        #     nmax -= nmin
-        nmax %= nmin
-        nmax, nmin = nmin, nmax
-        if nmin == 0:
-            break
-        # nmax > nmin, nmin != 0
-    return nmax
-
 class PrimeGenerator():
     '''
         Generate n-bit prime number by doing:
@@ -153,6 +116,138 @@ class PrimeGenerator():
 
             print('end: ', time() - self.timestamp)
             return number
+
+dirname = os.path.dirname(__file__)
+# print("awal:", dirname)
+dirname = os.path.dirname(os.path.dirname(dirname))
+# print("akhir:", dirname)
+
+def readfile(directory):
+    # !file directory is relative to project folder (public-key-cipher)!
+    filename = os.path.join(dirname, directory)
+    with open(filename, 'rb') as file:
+        bytes = file.read()
+        return bytes
+
+def writefile(directory, content):
+    # !file directory is relative to project folder (public-key-cipher)!
+    filename = os.path.join(dirname, directory)
+    with open(filename, 'wb') as file:
+        file.write(content)
+
+def gcd(a, b):
+    # Return FPB/GCD of a and b
+    if a > b:
+        nmax = a
+        nmin = b
+    else:
+        nmax = b
+        nmin = a
+    #
+    while True:
+        # while nmax >= nmin:
+        #     nmax -= nmin
+        nmax %= nmin
+        nmax, nmin = nmin, nmax
+        if nmin == 0:
+            break
+        # nmax > nmin, nmin != 0
+    return nmax
+
+def isqrt(n):
+    # Determine if n is a perfect square iwth Newton's method
+    # Return True if n is a perfect square
+    # n > 0
+    x = n//2
+    seen = set([x])
+    while x**2 != n:
+        x = (x + (n//x)) // 2
+        if x in seen: return False
+        seen.add(x)
+    return True
+
+def legendre_symbol(a, p):
+    """
+        [DESC]
+            Determine Legendre symbol a|p = a^((p-1)/2) (mod p)
+            The Legendre symbol is used to determine if there is a perfect square that is equivalent
+            to a in modulo p (aka a has a square root modulo on p),
+            i.e. there's x in range [0, p) such that x^2 (mod p) = a
+        [PARAMS]
+            p: int      { integer, prime }
+            a: int      { integer in range [0,p), relatively prime to p }
+        [RETURN]
+            1 if a has a square root modulo
+            -1 if a doesn't have a square root modulo
+            0 if a is divisible by p
+    """
+    ls = pow(a, (p-1)//2, p)
+    return -1 if ls == p-1 else ls
+
+def modular_sqrt(a, p):
+    """
+        [DESC]
+            Tonelli-Shanks algorithm to solve the congruence:
+            x^2 = a (mod p)
+
+        Find a quadratic residue (mod p) of 'a'. p
+        must be an odd prime.
+        Solve the congruence of the form:
+            x^2 = a (mod p)
+        And returns x. Note that p - x is also a root.
+        0 is returned is no square root exists for
+        these a and p.
+    """
+    # Simple cases
+    if legendre_symbol(a, p) != 1:
+        return 0
+    elif a == 0:
+        return 0
+    elif p == 2:
+        return p
+    elif p % 4 == 3:
+        return pow(a, (p+1)//4, p)
+
+    # Factorize powers of 2 from p-1
+    # i.e. express p-1 in the form of s*(2^e), where s is odd
+    s = p-1
+    e = 0
+    while s % 2 == 0:
+        s //= 2
+        e += 1
+
+    # Find some 'n' with a Legendre symbol n|p = -1.
+    n = 2
+    while legendre_symbol(n, p) != -1:
+        n += 1
+
+    # x is the square root module that we want to solve, x's value gets better for each iteration.
+    # b is the "fudge factor" - by how much we're off with the guess. The invariant x^2 = ab (mod p)
+    # is maintained throughout the loop.
+    # g is used for successive powers of n to update both a and b
+    # r is the exponent that decreases with each update
+    # p = s * 2^e + 1
+    x = pow(a, (s + 1)//2, p)   # x = a^(s+1)/2 mod p
+    b = pow(a, s, p)            # b = a^s mod p; x^2 = ab mod p = a^(s+1) mod p
+    g = pow(n, s, p)            # g = n^s mod p
+    r = e
+
+    while True:
+        t = b
+        m = 0
+        for m in range(r):
+            if t == 1:
+                break
+            t = pow(t, 2, p)
+
+        if m == 0:
+            return x
+
+        gs = pow(g, 2**(r-m-1), p)
+        g = pow(gs, 2,  p)
+        x = (x * gs) % p
+        b = (b * g) % p
+        r = m
 
 if __name__ == "__main__":
     writefile("test/rsa-output-test.txt", '\x01'.encode("utf-8"))
