@@ -14,6 +14,7 @@ TEMP_DIR = "./temp/"
 def home():
     return render_template("home.html")
 
+#---------- ELGAMAL -------------
 @app.route('/elgamal')
 def elgamal():
     return render_template("elgamal.html")
@@ -103,6 +104,8 @@ def elgamal_decrypt_file():
     path = os.path.join(current_app.root_path + "/" + outfilename)
     return send_file(path, as_attachment=True)
 
+
+#---------- PAILLIER -------------
 @app.route("/paillier")
 def paillier():
     return render_template("paillier.html")
@@ -114,7 +117,7 @@ def paillier_genkey():
                 KEY_DIR+"paillier.pri")
     key = dict()
     key['g'], key['n'] = pail.key.public()
-    key['h'], key['u'] = pail.key.private()
+    key['h'], key['u'], _ = pail.key.private()
     for k in key:
         key[k] = str(key[k])
     return key
@@ -146,6 +149,41 @@ def paillier_decrypt():
                         TEMP_DIR+"output.txt")
     result = open(TEMP_DIR+"output.txt", 'r').read()
     return result
+
+@app.route("/paillier/dumpkey", methods=["POST", "GET"])
+def paillier_dumpkey():
+    data = json.loads(request.form.get('data'))
+    pail = Paillier()
+    pail.key.setKey(int(data["g"]),\
+                    int(data["n"]), \
+                    int(data["h"]), \
+                    int(data["u"]))
+    pail.dumpKey(TEMP_DIR+"key.pub", TEMP_DIR+"key.pri")
+    return "success"
+
+@app.route("/paillier/file_encrypt", methods=["POST", "GET"])
+def paillier_encrypt_file():
+    f = request.files["file"]
+    f.save(TEMP_DIR+"input")
+    pail = Paillier()
+    pail.importPubKey(TEMP_DIR+"key.pub")
+    pail.importPriKey(TEMP_DIR+"key.pri")
+    outfilename = ".out/output"
+    pail.encrypt_any_file(TEMP_DIR+"input", "./src/"+outfilename)
+    path = os.path.join(current_app.root_path + "/" + outfilename)
+    return send_file(path, as_attachment=True)
+
+@app.route("/paillier/file_decrypt", methods=["POST", "GET"])
+def paillier_decrypt_file():
+    f = request.files["file"]
+    f.save(TEMP_DIR+"input")
+    pail = Paillier()
+    pail.importPubKey(TEMP_DIR+"key.pub")
+    pail.importPriKey(TEMP_DIR+"key.pri")
+    outfilename = ".out/output"
+    pail.decrypt_any_file(TEMP_DIR+"input", "./src/"+outfilename)
+    path = os.path.join(current_app.root_path + "/" + outfilename)
+    return send_file(path, as_attachment=True)
 
 if __name__ == "__main__":
     app.run(debug=True)

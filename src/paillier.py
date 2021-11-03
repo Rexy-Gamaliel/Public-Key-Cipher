@@ -39,7 +39,7 @@ class KeyGen():
         return self.g, self.n
 
     def private(self):
-        return self.h, self.u
+        return self.h, self.u, self.n
 
     def dumpPub(self, f:FileIO):
         f.write("PAILLIER PUBLIC KEY\n")
@@ -50,6 +50,7 @@ class KeyGen():
         f.write("PAILLIER PRIVATE KEY\n")
         f.write(str(self.h)+"\n")
         f.write(str(self.u)+"\n")
+        f.write(str(self.n)+"\n")
 
     def setKey(self, g=None, n=None, h=None, u=None):
         if g:
@@ -60,6 +61,7 @@ class KeyGen():
             self.h = h
         if u:
             self.u = u
+
 
 
 class Paillier():
@@ -75,9 +77,36 @@ class Paillier():
     
     def printKey(self):
         g, n = self.key.public()
-        h, u = self.key.private()
+        h, u, _ = self.key.private()
         print('''g : {}\nn : {}\nh : {}\nu : {}'''
                 .format(g, n, h, u))
+
+    def importPubKey(self, filename):
+        file = open(filename, "r")
+        buffer = file.read()
+        file.close()
+
+        lines = buffer.split("\n")
+        if lines[0].split(" ")[0] != "PAILLIER":
+            print("Import failed")
+            return
+
+        self.key.setKey(g=int(lines[1]),\
+                        n=int(lines[2]))
+
+    def importPriKey(self, filename):
+        file = open(filename, "r")
+        buffer = file.read()
+        file.close()
+
+        lines = buffer.split("\n")
+        if lines[0].split(" ")[0] != "PAILLIER":
+            print("Import failed")
+            return
+
+        self.key.setKey(h=int(lines[1]),\
+                        u=int(lines[2]),\
+                        n=int(lines[3]))
 
     def gen_r(self) :
         n = self.key.n
@@ -98,8 +127,7 @@ class Paillier():
         return cipher
 
     def decrypt(self, cipher):
-        h, u = self.key.private()
-        g, n = self.key.public()
+        h, u, n = self.key.private()
         plain = []
         for c in cipher:
             ch = pow(c, h, n**2)
@@ -134,6 +162,36 @@ class Paillier():
         with open(outfile, 'w') as f:
             f.write(plaintext)
 
+    def encrypt_any_file(self, infile:str, outfile:str):
+        file = open(infile, "rb")
+        byte = file.read()
+        file.close()
+        byte2 = []
+        byte2.extend(byte[:10])
+        plaintext = "".join(chr(b) for b in byte)
+        plain = Encoder().encode(plaintext, self.key.n)
+        cipher = self.encrypt(plain)
+        with open(outfile, "w") as f:
+            for c in cipher:
+                f.write(str(c)+" ")
+    
+    def decrypt_any_file(self, infile:str, outfile:str):
+        file = open(infile, 'r')
+        buff = file.read().split(" ")
+        file.close()
+        cipher = []
+        for c in buff:
+            try:
+                cipher.append(int(c))
+            except:
+                pass
+        with open(outfile, 'wb') as f:
+            plain = self.decrypt(cipher)
+            plaintext = Encoder().decode(plain, self.key.n)
+            plain = []
+            for p in plaintext:
+                plain.append(ord(p))
+            f.write(bytes(plain))
 
 def main():
     print("hello palier")
@@ -142,11 +200,15 @@ def main():
     pail.dumpKey(KEY_DIR+"paillier.pub",\
                 KEY_DIR+"paillier.pri")
 
-    pail.encrypt_file(TEST_DIR+"input.txt", \
-                        TEST_DIR+"output.txt")
+    # pail.encrypt_file(TEST_DIR+"input.txt", \
+    #                     TEST_DIR+"output.txt")
 
-    pail.decrypt_file(TEST_DIR+"output.txt", \
-                        TEST_DIR+"output2.txt")
+    # pail.decrypt_file(TEST_DIR+"output.txt", \
+    #                     TEST_DIR+"output2.txt")
+
+    pail.encrypt_any_file(TEST_DIR+"input", TEST_DIR+"output")
+    pail.decrypt_any_file(TEST_DIR+"output", TEST_DIR+"output2")
+
 
 if __name__ == "__main__":
     main()
